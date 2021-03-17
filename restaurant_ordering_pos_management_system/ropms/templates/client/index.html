@@ -1,0 +1,54 @@
+{% extends 'client/base.html' %}
+{% load static %}
+
+{% block title %}
+RALF Modern Cuisine Restaurant Table Selection
+{% endblock title %}
+
+{% block css %}
+{% endblock css %}
+
+
+{% block nav_home %}
+<a class="active" href="{% url 'ropms:index_client' %}"> <span class="icon-home"></span> Home</a>
+{% endblock nav_home %}
+
+{% block nav_shopping_cart %}
+{% endblock nav_shopping_cart %}
+
+{% block icon_shopping_cart %}
+{% endblock icon_shopping_cart %}
+
+{% block nav_index %}
+<li class="active"><a href="{% url 'ropms:index_client' %}">Home</a></li>
+{% endblock nav_index %}
+
+{% block nav_search_form %}
+{% endblock nav_search_form%}
+
+{% block content %}
+
+
+<div class="well">
+    <form class="form-horizontal" method="POST">
+        {% csrf_token %}
+        <h3>Enter Email Address If You Are Already Registered</h3> 
+        {% include 'partials/_messages.html' %}
+        <div class="control-group">
+            <label class="control-label" for="inputEmail">Email <sup>*</sup></label>
+            <div class="controls">
+                <input type="email" placeholder="Email" name="email" required>
+            </div>
+        </div>
+       
+ 
+        <div class="control-group">
+            <div class="controls">
+                <input type="submit" name="submitAccount" value="Enter" class="exclusive shopBtn">
+                <input type="button" value="Register" class="exclusive shopBtn" onclick="window.location.href='{% url 'ropms:registration' %}'"> 
+            </div>
+        </div>
+    </form>
+</div>
+
+{% endblock content%}

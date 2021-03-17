@@ -1,0 +1,60 @@
+{% extends 'client/base.html' %}
+{% load static %}
+
+{% block title %}
+RALF Modern Cuisine Restaurant Table Selection
+{% endblock title %}
+
+{% block css %}
+<style>
+    .span4{
+        margin: 2px !important;
+    }  
+</style>
+{% endblock css %}
+
+ 
+{% block nav_shopping_cart %}
+{% endblock nav_shopping_cart %}
+
+{% block icon_shopping_cart %}
+{% endblock icon_shopping_cart %}
+
+{% block nav_table_selection %}
+<li class="active"><a href="{% url 'ropms:table_selection' %}">Table Selection </a></li>
+{% endblock nav_table_selection %}
+
+{% block nav_search_form %}
+{% endblock nav_search_form%}
+
+{% block content %}
+<h3>Our Tables </h3>
+{% include 'partials/_messages.html' %}
+<div class="row-fluid">
+    <ul class="thumbnails"> 
+      {% for t in tables %}
+      <li class="span4">
+        <div class="thumbnail">
+          <a href="" class="overlay"></a> 
+          <a href=""><img src="{% static 'assets/food_img/table.jpg' %}" alt=""></a>
+          <div class="caption cntr">
+              <p>{{ t.name }}</p> 
+              {% if t.status == 'Occupied' %} 
+              <p style="color: red;"><strong>{{ t.status }}</strong></p> 
+              {% else %}
+              <p><strong>{{ t.status }}</strong></p> 
+              {% endif %} 
+              <h4><a class="shopBtn" href="{{ t.get_absolute_url }}" title="select table" readonly> Select </a></h4> 
+              <div class="actionList">
+                  <a class="pull-left" href="">Capacity: {{ t.capacity }}</a> 
+                  <a class="pull-left" href=""> {{ t.description }}</a> 
+              </div> 
+              <br class="clr"> 
+              
+          </div>
+        </div>
+      </li>
+      {% endfor%} 
+    </ul>
+  </div>
+{% endblock content%} 

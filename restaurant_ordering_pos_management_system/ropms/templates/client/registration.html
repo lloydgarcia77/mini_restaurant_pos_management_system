@@ -1,0 +1,84 @@
+{% extends 'client/base.html' %}
+{% load static %}
+
+{% block title %}
+RALF Modern Cuisine Restaurant Table Selection
+{% endblock title %}
+
+{% block css %}
+{% endblock css %}
+
+
+{% block nav_home %}
+<a class="active" href="{% url 'ropms:index_client' %}"> <span class="icon-home"></span> Home</a>
+{% endblock nav_home %}
+
+{% block nav_shopping_cart %}
+{% endblock nav_shopping_cart %}
+
+{% block icon_shopping_cart %}
+{% endblock icon_shopping_cart %}
+
+
+{% block nav_search_form %}
+{% endblock nav_search_form%}
+
+{% block content %}
+
+<div class="well">
+    <form class="form-horizontal" method="POST">
+        {% csrf_token %}
+        <h3>Your Personal Details</h3>
+        {% if form.errors %}  
+            <div class="alert">
+                <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> 
+                <strong>Error!</strong>  {{ form.errors }}
+            </div>
+        {% endif %}
+        <div class="control-group">
+            <label class="control-label" for="">First name <sup>*</sup></label>
+            <div class="controls">
+               {{  form.f_name }}
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="">Middle name <sup>*</sup></label>
+            <div class="controls">
+                {{  form.m_name }}
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="">Last name <sup>*</sup></label>
+            <div class="controls">
+                {{  form.l_name }}
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="">Age <sup>*</sup></label>
+            <div class="controls">
+                {{  form.age }}
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="">Email <sup>*</sup></label>
+            <div class="controls">
+                {{  form.email }}
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="">Gender <sup>*</sup></label>
+            <div class="controls">
+                {{  form.gender }}
+            </div>
+        </div>
+  
+        <div class="control-group">
+            <div class="controls">
+                <input type="submit" name="submitAccount" value="Register" class="exclusive shopBtn">
+                <input type="button" value="Back" class="exclusive shopBtn" onclick="window.location.href='{% url 'ropms:index_client' %}'"> 
+            </div>
+        </div>
+    </form>
+</div>
+
+{% endblock content%}

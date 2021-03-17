@@ -1,0 +1,97 @@
+{% extends 'client/base.html' %}
+{% load static %}
+{% load custom_template_tags %}
+
+{% block title %}
+RALF Modern Cuisine Restaurant Cart
+{% endblock title %}
+
+{% block css %}
+<style>
+    table td {
+        text-align: center !important;
+    }
+</style>
+{% endblock css %}
+
+{% block nav_shopping_cart %}
+<a class="active" href="{% url 'ropms:cart' waiting.customer.id waiting.table.id %}" id="nav-shopping-cart-summary">
+    {% nav_shopping_cart request.session.customer_email %}
+</a>
+{% endblock nav_shopping_cart %}
+
+{% block nav_search_form %}
+{% endblock nav_search_form%}
+
+{% block content %}
+
+<div class="well well-small">
+    <h1>Check Out <small class="pull-right"> {{cart.count}} Items are in the cart </small></h1>
+    <hr class="soften">
+
+    <table class="table table-bordered table-condensed" id="table-cart">
+        <thead>
+            <tr>
+                <th style="width: 20%;">Picture</th>
+                <th style="width: 10%;">Name</th>
+                <th style="width: 30%;">Description</th>
+                <th style="width: 10%;">Unit price</th>
+                <th style="width: 20%;">Qty </th>
+                <th style="width: 10%;">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in cart %}
+            <tr>
+                <td><img width="100" src="{{ c.menu_item.image.url }}" alt="Not Available"></td>
+                <td>{{ c.menu_item.name }}</td>
+                <td>{{ c.menu_item.description }}</td>
+                <td>₱ {{ c.menu_item.price }}</td>
+                <td>
+                    <input class="span1 item-quantity" style="max-width:34px" placeholder="1" size="16" type="text"
+                        value="{{ c.quantity }}" readonly>
+                    <div class="input-append">
+                        <button class="btn btn-mini delete-value" type="button" data-url="{% url 'ropms:update_item_to_cart' c.menu_item.id %}">-</button>
+                        <button class="btn btn-mini add-value" type="button" data-url="{% url 'ropms:update_item_to_cart' c.menu_item.id %}">+</button>
+                        <button class="btn btn-mini btn-danger delete-all-menu-items" type="button" data-url="{% url 'ropms:delete_item_from_the_cart' c.id %}"><span class="icon-remove"></span></button>
+                    </div>
+                </td>
+                <td class="total-amount">₱ {% total_amount c.quantity c.menu_item.price %}</td>
+            </tr>
+            {% endfor %}
+
+        </tbody>
+        <tfoot>
+            <tr>
+                <th colspan="5" class="alignR">Total Quantity: </th>
+                <th id="total-all-quantity">{{total_quantity}}</th>
+            </tr>
+            <tr>
+                <th colspan="5" class="alignR">Total Cost: </th>
+                <th class="label label-primary" id="total-all-amount"> ₱ {{total_amount}}</th>
+            </tr>
+        </tfoot>
+    </table><br>
+
+
+    <table class="table table-bordered">
+        <tbody>
+            <tr>
+                <td>
+                    <form class="form-inline">
+                        <label style="min-width:159px"> PAYMENT: </label>
+                        <input type="number" class="input-medium" placeholder="AMOUNT">
+                        <button type="submit" class="shopBtn"> CONFIRM</button>
+                    </form>
+                </td>
+            </tr>
+
+        </tbody>
+    </table>
+
+    <a href="{% url 'ropms:menu_selection' waiting.table.id %}" class="shopBtn btn-large"><span
+            class="icon-arrow-left"></span> Continue Shopping
+    </a>
+
+</div>
+{% endblock content%}

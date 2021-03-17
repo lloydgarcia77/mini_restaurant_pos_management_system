@@ -1,0 +1,20 @@
+{% if messages %} 
+    {% for message in messages %}
+        {% if message.tags == 'error' %}
+        <div class="alert">
+            <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> 
+            <strong>Error!</strong> {{message|safe}} 
+        </div> 
+        {% elif message.tags == 'warning' %}
+        <div class="alert-warning">
+            <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> 
+            <strong>Warning!</strong> {{message|safe}} 
+        </div> 
+        {% elif message.tags == 'success' %}
+        <div class="alert-success">
+            <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> 
+            <strong>Success!</strong> {{message|safe}} 
+        </div> 
+        {% endif %}
+    {% endfor %}
+{% endif %}

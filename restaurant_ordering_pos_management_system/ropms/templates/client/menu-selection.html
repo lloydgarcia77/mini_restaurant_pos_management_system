@@ -1,0 +1,56 @@
+{% extends 'client/base.html' %}
+{% load static %}
+{% load custom_template_tags %}
+
+
+{% block title %}
+RALF Modern Cuisine Restaurant Menu Selection
+{% endblock title %}
+
+
+{% block nav_shopping_cart %}
+<a href="{% url 'ropms:cart' waiting.customer.id waiting.table.id %}">
+    {% nav_shopping_cart request.session.customer_email %}
+</a> 
+{% endblock nav_shopping_cart %}
+
+{% block menu_list %}
+<li class="active"><a href="">Menu List</a></li>
+{% endblock menu_list %}
+
+{% block content %}
+<div class="well well-small">
+    {% for menu in menu_list %}
+    <div class="row-fluid">
+        <div class="span2">
+            <img src="{{ menu.image.url }}" alt="No Image Available">
+        </div>
+        <div class="span6">
+
+            <h5>{{ menu.name }}</h5>
+            <p>
+                {{ menu.description }}
+            </p>
+        </div>
+        <div class="span4 alignR">
+            <form class="form-horizontal qtyFrm">
+                <h3> ₱{{ menu.price }}</h3>
+                <label class="checkbox">
+                   {{menu.category}}
+                </label><br>
+                <div class="btn-group">
+                    <a href="{% url 'ropms:add_item_to_cart' waiting.customer.id menu.id %}" class="defaultBtn add-to-cart"><span class=" icon-shopping-cart"></span> Add to cart</a>
+                    <a href="{% url 'ropms:menu_detail' menu.id waiting.table.id %}" class="shopBtn">VIEW</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% if not forloop.last %}<hr class="soften">{% endif %} 
+    {% endfor %} 
+</div>
+<div class="well">
+    <hr class="soften">
+    <a href="{% url 'ropms:cancel_table_selection' waiting.id %}" class="shopBtn exclusive">Cancel</a>
+</div>
+
+{% endblock content%}
