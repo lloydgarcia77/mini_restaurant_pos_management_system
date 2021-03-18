@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse, Http404, HttpResponseRedirect, HttpResponse
 from django.urls import reverse, reverse_lazy 
 from django.db.models import Q, Avg, Count, Sum, F, FloatField
@@ -7,6 +7,7 @@ from django.contrib import messages
 from ropms import models, forms
 from functools import wraps
 
+from django.contrib.auth.decorators import login_required 
 import json
 # Create your views here.
 
@@ -79,6 +80,11 @@ def menu_selection(request, *args, **kwargs):
     table = get_object_or_404(models.CustomerTable, id=kwargs.get('id', None))  
     email = kwargs.get('email', None)
     menu_list = models.Menu.objects.all().filter(Q(status='Available'))
+
+    search_term = request.GET.get('search')
+    if search_term:
+        menu_list = menu_list.filter(Q(name__icontains=search_term) | Q(category__icontains=search_term))
+    
     try:
         waiting = models.Waiting.objects.all().get(Q(table=table))
         if  waiting.customer == email:
@@ -123,6 +129,8 @@ def menu_detail(request, *args, **kwargs):
     table = get_object_or_404(models.CustomerTable, id=kwargs.get('tid', None))  
     menu = get_object_or_404(models.Menu, Q(status='Available'), id=kwargs.get('id', None)) 
     related_menu = models.Menu.objects.all().filter(Q(category=menu.category)).exclude(Q(id=menu.id)) 
+
+  
     context = {
         'menu': menu,
         'related_menu': related_menu,
@@ -140,8 +148,12 @@ def cart(request, *args, **kwargs):
     tid = kwargs.get('tid',None)
     waiting = get_object_or_404(models.Waiting, customer__id=cid.id, table__id=tid)
     cart = models.Cart.objects.all().filter(Q(customer__id=cid.id)).order_by('-id')
+
     total_quantity = cart.aggregate(total=Sum('quantity'))['total'] 
+    total_quantity = total_quantity if total_quantity != None else 0 
     total_amount = cart.aggregate(total=Sum(F('quantity') * F('menu_item__price'), output_field=FloatField()))['total'] 
+    total_amount = total_amount if total_amount != None else 0  
+ 
     context = {
         'waiting': waiting,
         'cart': cart, 
@@ -149,6 +161,8 @@ def cart(request, *args, **kwargs):
         'total_amount': float(total_amount),
     }
     return render(request, template_name, context)
+
+
 
 
 @email_required
@@ -164,14 +178,21 @@ def add_item_to_cart(request, *args, **kwargs):
             quantity = json_request['quantity']
 
             cart, not_created = models.Cart.objects.get_or_create(customer=customer, menu_item=menu_item,  defaults={
-                'quantity': 2,
+                'quantity': quantity,
             })
             # cart.quantity += int(quantity)
-            cart.quantity = F('quantity') + 1
-            cart.save()
+            # cart.quantity = F('quantity') + quantity
+            # cart.save()
             # cart, not_created = models.Cart.objects.update_or_create(customer=customer, menu_item=menu_item, defaults={
             #     'quantity': 2,
             # }) 
+
+            total_all_quantity, total_all_amount, cart = get_results(customer) 
+
+            data['context'] = { 
+                'total_all_quantity': total_all_quantity,
+                'total_all_amount': total_all_amount,
+            }
         return JsonResponse(data)
     else:
         raise Http404()
@@ -189,11 +210,9 @@ def update_item_to_cart(request, *args, **kwargs):
             cart_item, not_created = models.Cart.objects.update_or_create(customer=customer, menu_item=menu_item, defaults={
                 'quantity': quantity,
             })  
-            total_amount = cart_item.quantity * cart_item.menu_item.price
+            total_amount = cart_item.quantity * cart_item.menu_item.price 
 
-            cart = models.Cart.objects.all().filter(Q(customer=customer)).order_by('-id')
-            total_all_quantity = cart.aggregate(total=Sum('quantity'))['total'] 
-            total_all_amount = cart.aggregate(total=Sum(F('quantity') * F('menu_item__price'), output_field=FloatField()))['total'] 
+            total_all_quantity, total_all_amount, cart = get_results(customer) 
              
             data['context'] = {
                 'total_amount': total_amount,
@@ -215,14 +234,79 @@ def delete_item_from_the_cart(request, *args, **kwargs):
             
             cart.delete()
 
-            cart = models.Cart.objects.all().filter(Q(customer=customer)).order_by('-id')
-            total_all_quantity = cart.aggregate(total=Sum('quantity'))['total'] 
-            total_all_amount = cart.aggregate(total=Sum(F('quantity') * F('menu_item__price'), output_field=FloatField()))['total'] 
+            total_all_quantity, total_all_amount, cart = get_results(customer) 
              
             data['context'] = { 
                 'total_all_quantity': total_all_quantity,
                 'total_all_amount': total_all_amount,
+                'count': cart.count(),
             }
             return JsonResponse(data)
     else:
         raise Http404()
+
+def get_results(customer):
+
+    cart = models.Cart.objects.all().filter(Q(customer=customer)).order_by('-id')
+    total_all_quantity = cart.aggregate(total=Sum('quantity'))['total'] 
+    total_all_quantity = total_all_quantity if total_all_quantity != None else 0
+    total_all_amount = cart.aggregate(total=Sum(F('quantity') * F('menu_item__price'), output_field=FloatField()))['total'] 
+    total_all_amount = total_all_amount if total_all_amount != None else 0
+
+    return total_all_quantity, float(total_all_amount), cart
+
+
+@email_required
+def checkout(request, *args, **kwargs): 
+    data = dict()
+    customer = get_object_or_404(models.Customer, id=kwargs.get('email',None).id) 
+    if request.is_ajax():
+        if request.method == "POST":
+            json_response = request.body
+            json_response = json.loads(json_response)
+            payment = json_response['payment']
+
+            total_all_quantity, total_all_amount, cart = get_results(customer) 
+            change = float(payment) - total_all_amount
+
+            if change < 0:
+                data['valid'] = False
+            else:
+
+                all_order = models.Cart.objects.all().filter(Q(customer=customer))
+                table_name = get_object_or_404(models.Waiting, customer__id=kwargs.get('email', None).id).table 
+                for order in all_order:
+                    pos = models.POS.objects.create(
+                        customer_name=customer,
+                        table_name=table_name,
+                        menu_name=order.menu_item.name,
+                        price=order.menu_item.price,
+                        quantity=order.quantity,
+                        total=float(order.quantity) * float(order.menu_item.price)
+                        )  
+                data['valid'] = True    
+                data['context'] = {
+                    'change': change,
+                    'url': str(redirect("ropms:index_client").url),
+                }
+                del request.session['customer_email']
+                request.session.modified = True
+
+        return JsonResponse(data)
+    else:
+        raise Http404()
+
+
+
+@login_required
+def admin_pos_dashboard(request):
+    template_name = "admin/admin_pos_dashboard.html"
+    pos = models.POS.objects.all()
+    total = pos.aggregate(total=Sum('total'))['total']  
+    total_quantity = pos.aggregate(total=Sum('quantity'))['total']  
+    context ={
+        'pos': pos,
+        'total': float(total),
+        'total_quantity': total_quantity,
+    }
+    return render(request, template_name, context)

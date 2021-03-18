@@ -122,7 +122,7 @@ Lower Header Section
                 <div class="span4 alignR">
                     <p><br> <strong> Support (24/7) : 0800 1234 678 </strong><br><br></p>
                     {% block icon_shopping_cart %}
-                    <span class="btn btn-mini">[ 2 ] <span class="icon-shopping-cart"></span></span>
+                    <!-- <span class="btn btn-mini">[ 2 ] <span class="icon-shopping-cart"></span></span> -->
                     <span class="btn btn-warning btn-mini">₱</span> 
                     {% endblock icon_shopping_cart %} 
                 </div>
@@ -157,7 +157,7 @@ Navigation Bar Section
                         </ul>
                         {% block nav_search_form %}
                         <form method="GET" class="navbar-search pull-right" style="margin-right: 5px;">
-                            <input type="text" placeholder="Search" class="search-query span2">
+                            <input type="text" name="search" placeholder="Search" class="search-query span2" >
                         </form>
                         {% endblock nav_search_form%}
                     </div>

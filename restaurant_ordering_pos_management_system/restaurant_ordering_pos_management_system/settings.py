@@ -136,4 +136,10 @@ STATIC_ROOT = STATIC_DIR
 MEDIA_ROOT = MEDIA_DIR
 MEDIA_URL = '/media/'
 
+LOGIN_URL = 'admin:index'
+LOGOUT_URL = 'admin:index'
+LOGIN_REDIRECT_URL = 'admin:index'
+LOGOUT_REDIRECT_URL = 'admin:index'
+
+
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True

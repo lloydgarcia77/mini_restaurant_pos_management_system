@@ -1,8 +1,10 @@
 from django.contrib import admin
 from ropms import models
 from import_export.admin import ImportExportModelAdmin 
+from django.db.models import Q, Avg, Count, Sum, F, FloatField
 # Register your models here.
 
+admin.site.site_url = "/admin/pos/dashboard"
 
 class CustomerTableAdmin(ImportExportModelAdmin):
     list_display = ('id','name', 'description', 'capacity', 'status', 'date_added')
@@ -48,3 +50,11 @@ class CartAdmin(ImportExportModelAdmin):
     list_per_page = 10
 
 admin.site.register(models.Cart, CartAdmin)
+
+class POSAdmin(ImportExportModelAdmin):
+    list_display = ('id','customer_name' ,'table_name', 'menu_name', 'quantity','price','total','date_added') 
+    search_fields = ('id','customer_name' ,'table_name', 'menu_name', 'quantity','price','total','date_added') 
+    list_per_page = 10 
+
+
+admin.site.register(models.POS, POSAdmin)

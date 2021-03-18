@@ -13,10 +13,12 @@ def total_amount(quantity, price):
 def nav_shopping_cart(email): 
     customer = get_object_or_404(models.Customer, email=email)
     cart = models.Cart.objects.all().filter(Q(customer__id=customer.id))
-    total_quantity = cart.aggregate(total=Sum('quantity'))['total']
-    total_amount = cart.aggregate(total=Sum(F('quantity') * F('menu_item__price'), output_field=FloatField()))['total']
+    total_quantity = cart.aggregate(total=Sum('quantity'))['total'] 
+    total_quantity = total_quantity if total_quantity != None else 0 
+    total_amount = cart.aggregate(total=Sum(F('quantity') * F('menu_item__price'), output_field=FloatField()))['total'] 
+    total_amount = total_amount if total_amount != None else 0
     context = {
         'total_quantity': total_quantity,
-        'total_amount': total_amount,
+        'total_amount': float(total_amount),
     }
     return context

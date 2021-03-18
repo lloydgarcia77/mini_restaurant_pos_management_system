@@ -8,7 +8,7 @@ RALF Modern Cuisine Restaurant Cart
 
 {% block css %}
 <style>
-    table td {
+    table th, tr, td {
         text-align: center !important;
     }
 </style>
@@ -24,12 +24,11 @@ RALF Modern Cuisine Restaurant Cart
 {% endblock nav_search_form%}
 
 {% block content %}
-
 <div class="well well-small">
-    <h1>Check Out <small class="pull-right"> {{cart.count}} Items are in the cart </small></h1>
+    <h1>Check Out <small class="pull-right" id="total-items"> {{cart.count}} Items are in the cart </small></h1>
     <hr class="soften">
 
-    <table class="table table-bordered table-condensed" id="table-cart">
+    <table class="table table-bordered table-condensed" id="table-cart" border="1" style="text-align: center;">
         <thead>
             <tr>
                 <th style="width: 20%;">Picture</th>
@@ -51,9 +50,13 @@ RALF Modern Cuisine Restaurant Cart
                     <input class="span1 item-quantity" style="max-width:34px" placeholder="1" size="16" type="text"
                         value="{{ c.quantity }}" readonly>
                     <div class="input-append">
-                        <button class="btn btn-mini delete-value" type="button" data-url="{% url 'ropms:update_item_to_cart' c.menu_item.id %}">-</button>
-                        <button class="btn btn-mini add-value" type="button" data-url="{% url 'ropms:update_item_to_cart' c.menu_item.id %}">+</button>
-                        <button class="btn btn-mini btn-danger delete-all-menu-items" type="button" data-url="{% url 'ropms:delete_item_from_the_cart' c.id %}"><span class="icon-remove"></span></button>
+                        <button class="btn btn-mini delete-value" type="button"
+                            data-url="{% url 'ropms:update_item_to_cart' c.menu_item.id %}">-</button>
+                        <button class="btn btn-mini add-value" type="button"
+                            data-url="{% url 'ropms:update_item_to_cart' c.menu_item.id %}">+</button>
+                        <button class="btn btn-mini btn-danger delete-all-menu-items" type="button"
+                            data-url="{% url 'ropms:delete_item_from_the_cart' c.id %}"><span
+                                class="icon-remove"></span></button>
                     </div>
                 </td>
                 <td class="total-amount">₱ {% total_amount c.quantity c.menu_item.price %}</td>
@@ -70,6 +73,14 @@ RALF Modern Cuisine Restaurant Cart
                 <th colspan="5" class="alignR">Total Cost: </th>
                 <th class="label label-primary" id="total-all-amount"> ₱ {{total_amount}}</th>
             </tr>
+            <tr>
+                <th colspan="5" class="alignR">Payment: </th>
+                <th class="label label-primary" id="cash"> ₱ </th>
+            </tr>
+            <tr>
+                <th colspan="5" class="alignR">Change: </th>
+                <th class="label label-primary" id="change"> ₱ </th>
+            </tr>
         </tfoot>
     </table><br>
 
@@ -78,10 +89,17 @@ RALF Modern Cuisine Restaurant Cart
         <tbody>
             <tr>
                 <td>
-                    <form class="form-inline">
-                        <label style="min-width:159px"> PAYMENT: </label>
-                        <input type="number" class="input-medium" placeholder="AMOUNT">
-                        <button type="submit" class="shopBtn"> CONFIRM</button>
+                    <form id="form-payment" class="form-inline" method="POST" data-url="{% url 'ropms:checkout' %}">
+                        {% csrf_token %}
+                        <div class="controls">
+                            <label style="min-width:159px"> PAYMENT: </label>
+                            <input id="payment" type="number" class="input-medium" placeholder="AMOUNT" required
+                                min="1">
+                            <span class="help-inline" style="display: none;" id="error-message">Please correct the
+                                error</span>
+                            <button type="submit" class="shopBtn"> CONFIRM</button>
+                        </div>
+
                     </form>
                 </td>
             </tr>
@@ -90,8 +108,10 @@ RALF Modern Cuisine Restaurant Cart
     </table>
 
     <a href="{% url 'ropms:menu_selection' waiting.table.id %}" class="shopBtn btn-large"><span
-            class="icon-arrow-left"></span> Continue Shopping
+            class="icon-arrow-left"></span> Continue Menu Selection
     </a>
+    <!-- <a id="printReceipt" class="shopBtn btn-large pull-right">Print to complete<span class="icon-arrow-right"></span></a> -->
 
 </div>
+
 {% endblock content%}

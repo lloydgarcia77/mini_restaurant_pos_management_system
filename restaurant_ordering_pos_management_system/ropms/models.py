@@ -88,3 +88,15 @@ class Cart(models.Model):
  
     def __str__(self):
         return str(self.menu_item)
+
+class POS(models.Model):
+    customer_name = models.CharField(max_length=100)
+    table_name = models.CharField(max_length=100)
+    menu_name = models.CharField(max_length=100)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default="0")
+    quantity = models.IntegerField()
+    total = models.DecimalField(max_digits=10, decimal_places=2) 
+    date_added = models.DateTimeField(auto_now_add=True) 
+
+    def __str__(self):
+        return self.menu_name

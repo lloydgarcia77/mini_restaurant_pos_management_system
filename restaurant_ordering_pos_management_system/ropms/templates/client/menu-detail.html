@@ -9,7 +9,7 @@ RALF Modern Cuisine Restaurant Menu Details
 
 
 {% block nav_shopping_cart %}
-<a href="{% url 'ropms:cart' customer.id table.id %}">
+<a href="{% url 'ropms:cart' customer.id table.id %}" id="nav-shopping-cart-summary">
     {% nav_shopping_cart request.session.customer_email %}
 </a>
 {% endblock nav_shopping_cart %}
@@ -19,6 +19,8 @@ RALF Modern Cuisine Restaurant Menu Details
 <li class="active"><a href="">Menu List</a></li>
 {% endblock menu_list %}
 
+{% block nav_search_form %} 
+{% endblock nav_search_form%}
 {% block content %}
 <ul class="breadcrumb">
     <li><a href="{% url 'ropms:menu_selection' table.id %}">Back</a> <span class="divider">/</span></li> 
