@@ -44,8 +44,9 @@ $(document).ready(function () {
     }
     $(".add-to-cart").on("click", function (e) {
         e.preventDefault();
+        
         let url = $(this).attr('href');
-        let quantity = $("#menu_item_quantity").val() ? $("#menu_item_quantity").val() : 1;
+        let quantity = $("#menu_item_quantity").val() ? $("#menu_item_quantity").val() : 1; 
         let data = {
             'quantity': quantity
         }

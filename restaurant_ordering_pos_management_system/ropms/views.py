@@ -162,9 +162,6 @@ def cart(request, *args, **kwargs):
     }
     return render(request, template_name, context)
 
-
-
-
 @email_required
 def add_item_to_cart(request, *args, **kwargs):
     data = dict() 
@@ -175,14 +172,14 @@ def add_item_to_cart(request, *args, **kwargs):
 
             json_request = request.body
             json_request= json.loads(json_request)
-            quantity = json_request['quantity']
-
-            cart, not_created = models.Cart.objects.get_or_create(customer=customer, menu_item=menu_item,  defaults={
-                'quantity': quantity,
-            })
+            quantity = json_request['quantity'] 
+            # cart, not_created = models.Cart.objects.get_or_create(customer=customer, menu_item=menu_item,  defaults={
+            #     'quantity': quantity,
+            # }) 
+            cart, not_created = models.Cart.objects.get_or_create(customer=customer, menu_item=menu_item) 
             # cart.quantity += int(quantity)
-            # cart.quantity = F('quantity') + quantity
-            # cart.save()
+            cart.quantity = F('quantity') + quantity
+            cart.save()
             # cart, not_created = models.Cart.objects.update_or_create(customer=customer, menu_item=menu_item, defaults={
             #     'quantity': 2,
             # }) 
@@ -274,11 +271,11 @@ def checkout(request, *args, **kwargs):
             else:
 
                 all_order = models.Cart.objects.all().filter(Q(customer=customer))
-                table_name = get_object_or_404(models.Waiting, customer__id=kwargs.get('email', None).id).table 
+                table = get_object_or_404(models.Waiting, customer__id=kwargs.get('email', None).id) 
                 for order in all_order:
                     pos = models.POS.objects.create(
                         customer_name=customer,
-                        table_name=table_name,
+                        table_name=table.table,
                         menu_name=order.menu_item.name,
                         price=order.menu_item.price,
                         quantity=order.quantity,
@@ -290,8 +287,12 @@ def checkout(request, *args, **kwargs):
                     'url': str(redirect("ropms:index_client").url),
                 }
                 del request.session['customer_email']
-                request.session.modified = True
-
+                request.session.modified = True 
+                table.table.status = "Unoccupied"
+                table.table.save()
+               
+                customer.delete()
+             
         return JsonResponse(data)
     else:
         raise Http404()

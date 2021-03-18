@@ -111,7 +111,7 @@ RALF Modern Cuisine Restaurant Menu Details
                         <div class="btn-group">
                             <a href="{% url 'ropms:add_item_to_cart' customer.id r_menu.id %}" class="defaultBtn add-to-cart"><span class=" icon-shopping-cart"></span> Add to cart</a>
                                 Add to cart</a>
-                            <a href="{{ r_menu.get_absolute_url }}" class="shopBtn">VIEW</a>
+                            <a href="{% url 'ropms:menu_detail' r_menu.id table.id %}" class="shopBtn">VIEW</a>
                           
                         </div>
                     </form>

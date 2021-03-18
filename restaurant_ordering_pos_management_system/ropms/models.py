@@ -83,7 +83,7 @@ class Waiting(models.Model):
 class Cart(models.Model):
     customer = models.ForeignKey(Customer, related_name="cart_fk_customer", on_delete=models.CASCADE)
     menu_item = models.ForeignKey(Menu, related_name="cart_fk_menu_item", on_delete=models.CASCADE)
-    quantity = models.IntegerField() 
+    quantity = models.IntegerField(default=0) 
     date_added = models.DateTimeField(auto_now_add=True) 
  
     def __str__(self):
